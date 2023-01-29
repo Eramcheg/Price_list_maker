@@ -1,13 +1,14 @@
+import io
 import json
 import os
 import subprocess
 import sys
 from tkinter import filedialog
+
 import customtkinter as ct
 import openpyxl
 from PIL import JpegImagePlugin
 from xls2xlsx import XLS2XLSX
-
 
 ct.set_appearance_mode('dark')
 ct.set_default_color_theme("dark-blue")
@@ -33,11 +34,15 @@ class MainClass:
         self.endA = '1'
         self.startB = '2'
         self.endB = '1'
-        self.DescriptionCol =data["DESCRIPTION"]
+        self.DescriptionCol = data["DESCRIPTION"]
         self.ImageFolder = None
         self.export_folder = None
         self.dirImages = []
         self.NumOfPrices = 0
+        self.currency = "EUR"
+        self.theme = 'LIGHT'
+
+        self.FontColor = "BLACK"
 
     def startApp(self):
 
@@ -362,7 +367,7 @@ class MainClass:
 
 
 
-        comboboxDescription = ct.CTkComboBox(mainFrame, values=alphabet, command=lambda event: self.DescriptionCol(event, data))
+        comboboxDescription = ct.CTkComboBox(mainFrame, values=alphabet, command=lambda event: self.changeDescription(event, data))
         comboboxDescription.grid(row=7, column=1, padx=(20, 5), pady=(5, 0))
         if self.DescriptionCol=='A':
             comboboxDescription.set("Description Column")
@@ -370,6 +375,8 @@ class MainClass:
             comboboxDescription.set(self.DescriptionCol)
         labelDescription = ct.CTkLabel(mainFrame, text="Description Column")
         labelDescription.grid(row=6, column=1, padx=(20, 5), pady=(5, 0))
+
+
 
 
 
@@ -393,6 +400,10 @@ class MainClass:
         else:
             comboboxPriceOnce.set(self.ColumnPriceOnce)
 
+
+
+
+
         lableWhatPrice = ct.CTkLabel(mainFrame, text="Choose number of prices")
         comboboxWhatPrice = ct.CTkComboBox(mainFrame, values=['1 price', '2 prices'], command=lambda event:
         self.changedNumOfPrices(event, comboboxPrice1, comboboxPrice2, comboboxPriceOnce, lablePrice1, lablePrice2,
@@ -400,6 +411,34 @@ class MainClass:
         comboboxWhatPrice.set("Number of prices")
         comboboxWhatPrice.grid(row=5, column=2, padx=(20, 0), pady=(5, 0))
         lableWhatPrice.grid(row=4, column=2, padx=(20, 0), pady=(5, 0))
+
+
+
+
+
+       #lableTheme.grid(row=12,column=2, padx=(20,0),pady=(5,0))
+     #   comboboxTheme.grid(row=13, column=2,padx=(20,0),pady=(5,0))
+
+
+         # lableFont.grid(row=12, column=2, padx=(20, 0), pady=(5, 0))
+     #   comboboxFontColors.grid(row=13, column=2, padx=(20, 0), pady=(5, 0))
+
+
+
+
+
+
+        lableCurrency=ct.CTkLabel(mainFrame, text="Money Currency")
+        lableCurrency.grid(row=10, column=2, padx=(20, 0), pady=(5, 0))
+
+        comboboxCurrency=ct.CTkComboBox(mainFrame, values=["EUR", "USD", "GBP"], command=self.valueChangedCurrency)
+        comboboxCurrency.grid(row=11, column=2, padx=(20, 0), pady=(5, 0))
+
+
+
+
+
+
 
         comboboxPrice1.grid_forget()
         comboboxPrice2.grid_forget()
@@ -419,18 +458,25 @@ class MainClass:
         Entry_Row_End_Key_B = ct.CTkEntry(mainFrame, placeholder_text="Enter end row")
         ConfirmB = ct.CTkButton(mainFrame, text="Confirm",
                                 )
+        lableTheme = ct.CTkLabel(mainFrame, text="Lables theme")
+        lableFont = ct.CTkLabel(mainFrame, text="PDF font color")
+        comboboxTheme = ct.CTkComboBox(mainFrame, values=["LIGHT", "SPRING", "SUMMER", "YELLOW", "BLUE"], command=self.changedTheme)
+        comboboxFontColors = ct.CTkComboBox(mainFrame, values=["BLACK", "GRAY"],
+                                            command=self.changedFontColor)
 
         switchROWS = ct.CTkSwitch(master=mainFrame, text="Show edition", onvalue="on", offvalue="off",
                                   command=lambda: self.hideROWS(switchROWS, Combobox_Row_Start_Key_B,
-                                                                Entry_Row_End_Key_B, ConfirmB))
+                                                                Entry_Row_End_Key_B, ConfirmB, comboboxTheme,
+                                                                comboboxFontColors,lableTheme, lableFont))
         switchROWS.grid(row=8, column=0, columnspan=2, padx=20, pady=(5, 0))
 
         Combobox_Row_Start_Key_B.grid_forget()
         Entry_Row_End_Key_B.grid_forget()
         ConfirmB.grid_forget()
-
-
-
+        comboboxTheme.grid_forget()
+        comboboxFontColors.grid_forget()
+        lableTheme.grid_forget()
+        lableFont.grid_forget()
 
         # BUTTONS, OPEN THE EXCEL FILES
         buttonOpenExcel1 = ct.CTkButton(mainFrame, text="Load excel file", font=('Arial', 17),
@@ -446,17 +492,17 @@ class MainClass:
         buttonLoadFolder.grid(row=1, column=2, rowspan=2, padx=(10, 0), pady=(7, 0))
 
         labelProgressBar = ct.CTkLabel(mainFrame, text="Click Synchronize to start synchronization", font=('Arial', 17))
-        labelProgressBar.grid(row=12, column=0, columnspan=2, padx=20, pady=(5, 0))
+        labelProgressBar.grid(row=15, column=0, columnspan=2, padx=20, pady=(5, 0))
 
         progressFn2 = ct.CTkProgressBar(mainFrame)
-        progressFn2.grid(row=13, column=0, columnspan=2, padx=20, pady=(0, 10))
+        progressFn2.grid(row=16, column=0, columnspan=2, padx=20, pady=(0, 10))
         progressFn2.set(0)
 
         # BUTTON SYNCHRONIZE
 
         buttonSynchronize = ct.CTkButton(mainFrame, text="Synchronize", font=('Arial', 17),
                                          command=lambda: self.Synchronize(alphabet, labelProgressBar, progressFn2, data))
-        buttonSynchronize.grid(row=11, column=0, columnspan=2, padx=20, pady=0)
+        buttonSynchronize.grid(row=14, column=0, columnspan=2, padx=20, pady=0)
 
         # BUTTON RESTART
         restartButton = ct.CTkButton(mainFrame, text="Restart", font=('Arial', 17), command=self.restart)
@@ -481,15 +527,23 @@ class MainClass:
             print(self.export_folder)
 
     # this function hide and show edition
-    def hideROWS(self, switch, combobox, entry, confirm):
+    def hideROWS(self, switch, combobox, entry, confirm, comboboxTheme, comboboxFont, lableTheme, lableFont):
         if switch.get() == 'on':
             combobox.grid(row=9, column=0, padx=(20, 5), pady=(5, 0))
             entry.grid(row=9, column=1, padx=(10, 5), pady=(5, 0))
-            confirm.grid(row=10, column=0, columnspan=2, padx=20, pady=(5, 15))
+            confirm.grid(row=10, column=0, columnspan=2, padx=20, pady=(5, 0))
+            comboboxTheme.grid(row=12, column=0, padx=20, pady=(0, 6))
+            comboboxFont.grid(row=12,column=1,padx=(10, 5),pady=(0, 6))
+            lableTheme.grid(row=11, column=0, padx=20, pady=0)
+            lableFont.grid(row=11, column=1, padx=(10, 6), pady=0)
         else:
             combobox.grid_remove()
             entry.grid_remove()
             confirm.grid_remove()
+            comboboxTheme.grid_remove()
+            comboboxFont.grid_remove()
+            lableTheme.grid_forget()
+            lableFont.grid_forget()
 
     def changedNumOfPrices(self, event, combobox1, combobox2, combobox3, lable1, lable2, lable3):
 
@@ -524,7 +578,12 @@ class MainClass:
 
     def changeDescription(self, event, data):
         self.DescriptionCol = event
-        self["DESCRIPTION"] = event
+        data["DESCRIPTION"] = event
+    def changedFontColor(self,event):
+        self.FontColor=event
+    def changedTheme(self,event):
+        self.theme=event
+        print(self.theme)
 
     def Synchronize(self, alphabet, label, progress, data):
 
@@ -536,7 +595,6 @@ class MainClass:
 
 
             KEY_A = 0
-            NUMBER = 0
             DESCRIPTION = 0
             PRICE1 = 0
             PRICE2 = 0
@@ -544,6 +602,8 @@ class MainClass:
 
 
             NewString = ''
+            theme=''
+            cells=r'\node[text=white] at (1.1cm, 0.25cm) {#1};'
             content = (r'''
 \documentclass[9pt]{article}
 \usepackage{graphicx}
@@ -554,7 +614,26 @@ class MainClass:
 \usepackage{multirow,makecell}
 
 
-\usepackage{xcolor}
+\usepackage[german]{babel}
+
+\usepackage[autolanguage]{numprint}
+\usepackage{xcolor}''')
+            #if self.theme == "DARK":
+            #   theme += (r'''\pagecolor[rgb]{0.1,0.1,0.1} ''')
+            #elif self.theme == "BLUE":
+            #    theme += (r'''
+            #    \pagecolor[rgb]{0,0.05,0.15}
+            #    \color[rgb]{1,1,1}''')
+
+
+
+            if self.FontColor == 'WHITE':
+                theme += (r'''\color[rgb]{1.0,1.0,1.0}''')
+            elif self.FontColor == 'GRAY':
+                theme += (r'''\color[rgb]{0.5,0.5,0.5}''')
+            elif self.FontColor == 'BLUE':
+                theme += (r'''\color[rgb]{0.0,0.0,0.9}''')
+            content += theme+(r'''
 \usepackage{longtable}
 \usepackage{calc} % for calculating minipage widths
 \usepackage{tabularx}
@@ -569,6 +648,7 @@ John Smith\\University XYZ\\Albert Square\\Walford\\NC1 8AE
 }
 \begin{document}
 
+
 New manual
 
 \newpage
@@ -577,23 +657,53 @@ New manual
 
 \addtolength{\tabcolsep}{-4.2pt}
 \newcommand\roundedcellname[1]{
-    \begin{tikzpicture}
-        \filldraw[fill=gray!130, rounded corners=3mm] (0,0) rectangle (3.0cm,0.5cm);
-        \node[text=white] at (1.5cm, 0.25cm) {#1};
-    \end{tikzpicture}
+    \begin{tikzpicture}''')
+            if self.theme == 'LIGHT':
+                cells+=(r'''\filldraw[fill=gray!35, rounded corners=3mm] (0,0) rectangle (2.2cm,0.5cm);''')
+            elif self.theme == 'YELLOW':
+                cells+=(r'''\filldraw[fill=yellow!40, rounded corners=3mm] (0,0) rectangle (2.2cm,0.5cm);''')
+            elif self.theme == 'BLUE':
+                cells+=(r'''\filldraw[fill=blue!20, rounded corners=3mm] (0,0) rectangle (2.2cm,0.5cm);''')
+            elif self.theme == 'SPRING':
+                cells+=(r'''\filldraw[fill=green!20, rounded corners=3mm] (0,0) rectangle (2.2cm,0.5cm);''')
+            elif self.theme == 'SUMMER':
+                cells+=(r'''\filldraw[fill=red!20, rounded corners=3mm] (0,0) rectangle (2.2cm,0.5cm);''')
+            if self.FontColor == 'GRAY':
+                cells += r'''\node[text=gray] at (1.1cm, 0.25cm) {#1};'''
+            elif self.FontColor == 'BLUE':
+                cells += r'''\node[text=blue] at (1.1cm, 0.25cm) {#1};'''
+            elif self.FontColor == 'WHITE':
+                cells += r'''\node[text=black] at (1.1cm, 0.25cm) {#1};'''
+            elif self.FontColor == 'BLACK':
+                cells += r'''\node[text=black] at (1.1cm, 0.25cm) {#1};'''
+            content += cells
+            content += (r'''\end{tikzpicture}
 }
 
 \newcommand\roundedcellprice[1]{
-    \begin{tikzpicture}
-        \filldraw[fill=gray!15, rounded corners=3mm] (0,0) rectangle (1.4cm,0.6cm);
-        \node[text=black] at (0.7cm, 0.3cm) {#1};
-    \end{tikzpicture}
-}
+    \begin{tikzpicture}''')
+            if self.theme == 'LIGHT':
+                content += (r'''\filldraw[fill=gray!10, rounded corners=3mm] (0,0) rectangle (1.4cm,0.6cm);''')
+            elif self.theme == 'YELLOW':
+                content += (r'''\filldraw[fill=gray!10, rounded corners=3mm] (0,0) rectangle (1.4cm,0.6cm);''')
+                #content += (r'''\filldraw[fill=yellow!20, rounded corners=3mm] (0,0) rectangle (1.4cm,0.6cm);''')
+            elif self.theme == 'BLUE':
+                content += (r'''\filldraw[fill=gray!10, rounded corners=3mm] (0,0) rectangle (1.4cm,0.6cm);''')
+            elif self.theme == 'SPRING':
+                content += (r'''\filldraw[fill=yellow!15, rounded corners=3mm] (0,0) rectangle (1.4cm,0.6cm);''')
+            elif self.theme == 'SUMMER':
+                content += (r'''\filldraw[fill=orange!10, rounded corners=3mm] (0,0) rectangle (1.4cm,0.6cm);''')
+            if self.FontColor == 'GRAY':
+                content += r'''\node[text=gray] at (0.7cm, 0.3cm) {#1};'''
+            elif self.FontColor == 'BLUE':
+                content += r'''\node[text=blue] at (0.7cm, 0.3cm) {#1};'''
+            elif self.FontColor == 'WHITE':
+                content += r'''\node[text=black] at (0.7cm, 0.3cm) {#1};'''
+            elif self.FontColor == 'BLACK':
+                content += r'''\node[text=black] at (0.7cm, 0.3cm) {#1};'''
 
-\newcommand\roundedcellthird[1]{
-    \begin{tikzpicture}
-        \filldraw[fill=gray!20, rounded corners=0mm] (0,0) rectangle (2cm,0.6cm);
-        \node[text=black] at (1.0cm, 0.3cm) {#1};
+            #\node[text=black] at (0.7cm, 0.3cm) {#1};
+            content+=(r'''
     \end{tikzpicture}
 }
 
@@ -659,9 +769,9 @@ New manual
 
                                 if id == imgNum:
                                     if self.NumOfPrices == 1:
-                                        four_ids.append([id, self.ImageFolder+'/'+ array_img[j], description, priceOne])
+                                        four_ids.append([id, self.ImageFolder+'/'+ array_img[j], description, self.currency +' '+ str(priceOne)])
                                     elif self.NumOfPrices == 2:
-                                        four_ids.append([id, self.ImageFolder+'/' + array_img[j], description, price1, price2])
+                                        four_ids.append([id, self.ImageFolder+'/' + array_img[j], description, self.currency +' '+ str(price1),self.currency+' '+ str(price2)])
 
                                     if len(four_ids) < 4:
 
@@ -676,14 +786,14 @@ New manual
                                         \multirow{2}{*}{\includegraphics[width=0.1\textwidth]{%s}} & \roundedcellname{\small{%s}}
                                         \\ 
     
-                                        & \tiny{%s} & 
-                                        & \tiny{%s} &
-                                        & \tiny{%s} &
-                                        & \tiny{%s} \\[+0.6cm]
-                                        & \roundedcellprice{\tiny{EUR %s}} \roundedcellprice{\tiny{EUR %s}} & 
-                                        & \roundedcellprice{\tiny{EUR %s}} \roundedcellprice{\tiny{EUR %s}} & 
-                                        & \roundedcellprice{\tiny{EUR %s}} \roundedcellprice{\tiny{EUR %s}} & 
-                                        & \roundedcellprice{\tiny{EUR %s}} \roundedcellprice{\tiny{EUR %s}} \\
+                                        & \tiny{\verb!%s!} & 
+                                        & \tiny{\verb!%s!} &
+                                        & \tiny{\verb!%s!} &
+                                        & \tiny{\verb!%s!} \\[+0.6cm]
+                                        & \roundedcellprice{\tiny{%s}} \roundedcellprice{\tiny{%s}} & 
+                                        & \roundedcellprice{\tiny{%s}} \roundedcellprice{\tiny{%s}} & 
+                                        & \roundedcellprice{\tiny{%s}} \roundedcellprice{\tiny{%s}} & 
+                                        & \roundedcellprice{\tiny{%s}} \roundedcellprice{\tiny{%s}} \\
                                         \midrule
                                         ''') % (four_ids[0][1], four_ids[0][0],
                                                 four_ids[1][1], four_ids[1][0],
@@ -692,8 +802,10 @@ New manual
 
                                                 four_ids[0][2], four_ids[1][2], four_ids[2][2], four_ids[3][2],
 
-                                                four_ids[0][3], four_ids[1][3], four_ids[2][3], four_ids[3][3],
-                                                four_ids[0][4], four_ids[1][4], four_ids[2][4], four_ids[3][4])
+                                                four_ids[0][3], four_ids[0][4],
+                                                four_ids[1][3], four_ids[1][4],
+                                                four_ids[2][3], four_ids[2][4],
+                                                four_ids[3][3], four_ids[3][4])
                                         if self.NumOfPrices == 1:
                                                 NewString += (r'''
                                             \multirow{3}{*}{\includegraphics[width=0.1\textwidth]{%s}}&  \roundedcellname{\small{%s}} & 
@@ -702,14 +814,14 @@ New manual
                                             \multirow{2}{*}{\includegraphics[width=0.1\textwidth]{%s}} & \roundedcellname{\small{%s}}
                                             \\ 
     
-                                            & \tiny{%s} & 
-                                            & \tiny{%s} &
-                                            & \tiny{%s} &
-                                            & \tiny{%s} \\[+0.6cm]
-                                            & \roundedcellprice{\tiny{EUR %s}} & 
-                                            & \roundedcellprice{\tiny{EUR %s}} & 
-                                            & \roundedcellprice{\tiny{EUR %s}} & 
-                                            & \roundedcellprice{\tiny{EUR %s}} \\
+                                            & \tiny{\verb!%s!} & 
+                                            & \tiny{\verb!%s!} &
+                                            & \tiny{\verb!%s!} &
+                                            & \tiny{\verb!%s!} \\[+0.6cm]
+                                            & \roundedcellprice{\tiny{%s}} & 
+                                            & \roundedcellprice{\tiny{%s}} & 
+                                            & \roundedcellprice{\tiny{%s}} & 
+                                            & \roundedcellprice{\tiny{%s}} \\
                                             \midrule
                                             ''') % (four_ids[0][1], four_ids[0][0],
                                                     four_ids[1][1], four_ids[1][0],
@@ -734,13 +846,15 @@ New manual
 \end{document}''')
                 label.configure(text="Please wait, last steps...")
                 label.update()
+
                 file=self.export_folder+'/' + 'Output.tex'
-                with open(file, 'w') as f:
-                    f.write(content)
+                f=io.open(file,mode='w', encoding='utf-8')
+                #with open(file, 'w') as f:
+                f.write(content)
+                f.close()
 
 
-
-                subprocess.call(['pdflatex', '-output-directory='+self.export_folder+'/', file])
+                subprocess.call(['pdflatex',  '-output-directory='+self.export_folder+'/', file])
 
 
 
@@ -754,6 +868,12 @@ New manual
                     os.remove(self.export_folder+'/' + 'Output.txt')
                 if os.path.exists(self.export_folder+'/' + 'Output.log'):
                     os.remove(self.export_folder+'/' + 'Output.log')
+
+
+
+
+
+
                 label.configure(text="File created successfully!")
                 label.update()
 
@@ -777,6 +897,8 @@ New manual
     def valueChangedColumnFromA(self, event):
         self.invoiceDataFrom = event
         print(self.invoiceDataFrom)
+    def valueChangedCurrency(self, event):
+        self.currency=event
 
     def valueChangedColumnFromB(self, event):
         self.invoiceDataFromB = event

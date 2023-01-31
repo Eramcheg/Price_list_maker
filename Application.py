@@ -748,8 +748,13 @@ New manual
                 finish = len(array_img)
 
                 four_ids = []
+                temp=PRICEONE
                 for i in fromSheet1.iter_rows():
                     id = str(i[KEY_A].value)
+                    if self.NumOfPrices == 2:
+                        PRICEONE = PRICE1
+                    else:
+                        PRICEONE=temp
                     description = i[DESCRIPTION].value
                     price1 = i[PRICE1].value
                     price2 = i[PRICE2].value
@@ -769,9 +774,9 @@ New manual
 
                                 if id == imgNum:
                                     if self.NumOfPrices == 1:
-                                        four_ids.append([id, self.ImageFolder+'/'+ array_img[j], description, self.currency +' '+ str(priceOne)])
+                                        four_ids.append([id, self.ImageFolder+'/'+ array_img[j], description, self.currency +' '+ str(round(float(str(priceOne)),1))])
                                     elif self.NumOfPrices == 2:
-                                        four_ids.append([id, self.ImageFolder+'/' + array_img[j], description, self.currency +' '+ str(price1),self.currency+' '+ str(price2)])
+                                        four_ids.append([id, self.ImageFolder+'/' + array_img[j], description, self.currency +' '+ str(round(float(str(price1)), 1)),self.currency+' '+ str(round(float(str(price2)), 1))])
 
                                     if len(four_ids) < 4:
 
@@ -879,10 +884,17 @@ New manual
 
 
             except PermissionError:
+                label.configure(text="Please, close active excel file(-s) and try again")
+                label.update()
                 print("ERROR")
+            except IndexError:
+                label.configure(text="One of chosen columns is empty")
+                label.update()
                 # self.updating_scale(label, progress, counter_of_actions, all_actions,
                 #                     "Please, close active excel file(-s) and try again")
-        # except:
+            except:
+                label.configure(text="Something went wrong!")
+                label.update()
         #    self.updating_scale(label, progress, counter_of_actions, all_actions,
         #                       "Something went wrong")
 

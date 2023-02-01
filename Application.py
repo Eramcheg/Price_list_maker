@@ -738,7 +738,7 @@ New manual
                 else:
                     end1 = int(self.endB)
 
-                count= end1-start1
+                count = end1-start1
 
                 array_img = []
                 for i in range(len(self.dirImages)):
@@ -774,9 +774,20 @@ New manual
 
                                 if id == imgNum:
                                     if self.NumOfPrices == 1:
-                                        four_ids.append([id, self.ImageFolder+'/'+ array_img[j], description, self.currency +' '+ str(round(float(str(priceOne)),1))])
+                                        price = round(float(str(priceOne)),1)
+                                        if int(price) == price:
+                                            four_ids.append([id, self.ImageFolder+'/'+ array_img[j], description, self.currency +' '+ str(int(price))])
+                                        else:
+                                            four_ids.append([id, self.ImageFolder + '/' + array_img[j], description,
+                                                             self.currency + ' ' + str(price)])
                                     elif self.NumOfPrices == 2:
-                                        four_ids.append([id, self.ImageFolder+'/' + array_img[j], description, self.currency +' '+ str(round(float(str(price1)), 1)),self.currency+' '+ str(round(float(str(price2)), 1))])
+                                        price_1=round(float(str(price1)), 1)
+                                        price_2 = round(float(str(price2)), 1)
+                                        if int(price_1)==price_1:
+                                            price_1=int(price_1)
+                                        if int(price_2) == price_2:
+                                            price_2=int(price_2)
+                                        four_ids.append([id, self.ImageFolder+'/' + array_img[j], description, self.currency +' '+ str(price_1),self.currency+' '+ str(price_2)])
 
                                     if len(four_ids) < 4:
 
